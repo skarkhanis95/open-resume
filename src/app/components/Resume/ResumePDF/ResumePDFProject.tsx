@@ -18,22 +18,43 @@ export const ResumePDFProject = ({
 }) => {
   return (
     <ResumePDFSection themeColor={themeColor} heading={heading}>
-      {projects.map(({ project, date, descriptions }, idx) => (
-        <View key={idx}>
-          <View
-            style={{
-              ...styles.flexRowBetween,
-              marginTop: spacing["0.5"],
-            }}
-          >
-            <ResumePDFText bold={true}>{project}</ResumePDFText>
-            <ResumePDFText>{date}</ResumePDFText>
+      {projects.map(({ project, date, descriptions }, idx) => {
+        const [firstBullet, ...restBullets] = descriptions;
+        return (
+          <View key={idx} style={{ marginBottom: spacing["3"] }}>
+            <View wrap={false}>
+              <View
+                style={{
+                  ...styles.flexRowBetween,
+                  alignItems: "flex-start",
+                  gap: spacing["3"],
+                }}
+              >
+                {project ? (
+                  <ResumePDFText bold={true} style={{ fontSize: "11pt", flex: 1 }}>
+                    {project}
+                  </ResumePDFText>
+                ) : (
+                  <View style={{ flex: 1 }} />
+                )}
+                {date ? (
+                  <ResumePDFText style={{ color: "#444444" }}>{date}</ResumePDFText>
+                ) : null}
+              </View>
+              {firstBullet !== undefined && (
+                <View style={{ ...styles.flexCol, marginTop: spacing["1.5"] }}>
+                  <ResumePDFBulletList items={[firstBullet]} />
+                </View>
+              )}
+            </View>
+            {restBullets.length > 0 && (
+              <View style={{ ...styles.flexCol }}>
+                <ResumePDFBulletList items={restBullets} />
+              </View>
+            )}
           </View>
-          <View style={{ ...styles.flexCol, marginTop: spacing["0.5"] }}>
-            <ResumePDFBulletList items={descriptions} />
-          </View>
-        </View>
-      ))}
+        );
+      })}
     </ResumePDFSection>
   );
 };

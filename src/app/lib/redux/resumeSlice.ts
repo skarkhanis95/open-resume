@@ -1,18 +1,19 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "lib/redux/store";
 import type {
-  FeaturedSkill,
   Resume,
   ResumeEducation,
   ResumeProfile,
   ResumeProject,
   ResumeSkills,
   ResumeWorkExperience,
+  SkillCategory,
 } from "lib/redux/types";
 import type { ShowForm } from "lib/redux/settingsSlice";
 
 export const initialProfile: ResumeProfile = {
   name: "",
+  headline: "",
   summary: "",
   email: "",
   phone: "",
@@ -41,14 +42,8 @@ export const initialProject: ResumeProject = {
   descriptions: [],
 };
 
-export const initialFeaturedSkill: FeaturedSkill = { skill: "", rating: 4 };
-export const initialFeaturedSkills: FeaturedSkill[] = Array(6).fill({
-  ...initialFeaturedSkill,
-});
-export const initialSkills: ResumeSkills = {
-  featuredSkills: initialFeaturedSkills,
-  descriptions: [],
-};
+export const initialSkillCategory: SkillCategory = { name: "", skills: "" };
+export const initialSkills: ResumeSkills = [{ ...initialSkillCategory }];
 
 export const initialCustom = {
   descriptions: [],
@@ -61,6 +56,7 @@ export const initialResumeState: Resume = {
   projects: [initialProject],
   skills: initialSkills,
   custom: initialCustom,
+  languages: "",
 };
 
 // Keep the field & value type in sync with CreateHandleChangeArgsWithDescriptions (components\ResumeForm\types.ts)
@@ -113,26 +109,14 @@ export const resumeSlice = createSlice({
     },
     changeSkills: (
       draft,
-      action: PayloadAction<
-        | { field: "descriptions"; value: string[] }
-        | {
-            field: "featuredSkills";
-            idx: number;
-            skill: string;
-            rating: number;
-          }
-      >
+      action: PayloadAction<{
+        idx: number;
+        field: keyof SkillCategory;
+        value: string;
+      }>
     ) => {
-      const { field } = action.payload;
-      if (field === "descriptions") {
-        const { value } = action.payload;
-        draft.skills.descriptions = value;
-      } else {
-        const { idx, skill, rating } = action.payload;
-        const featuredSkill = draft.skills.featuredSkills[idx];
-        featuredSkill.skill = skill;
-        featuredSkill.rating = rating;
-      }
+      const { idx, field, value } = action.payload;
+      draft.skills[idx][field] = value;
     },
     changeCustom: (
       draft,
@@ -140,6 +124,9 @@ export const resumeSlice = createSlice({
     ) => {
       const { value } = action.payload;
       draft.custom.descriptions = value;
+    },
+    changeLanguages: (draft, action: PayloadAction<{ value: string }>) => {
+      draft.languages = action.payload.value;
     },
     addSectionInForm: (draft, action: PayloadAction<{ form: ShowForm }>) => {
       const { form } = action.payload;
@@ -156,6 +143,10 @@ export const resumeSlice = createSlice({
           draft.projects.push(structuredClone(initialProject));
           return draft;
         }
+        case "skills": {
+          draft.skills.push(structuredClone(initialSkillCategory));
+          return draft;
+        }
       }
     },
     moveSectionInForm: (
@@ -167,7 +158,7 @@ export const resumeSlice = createSlice({
       }>
     ) => {
       const { form, idx, direction } = action.payload;
-      if (form !== "skills" && form !== "custom") {
+      if (form !== "custom") {
         if (
           (idx === 0 && direction === "up") ||
           (idx === draft[form].length - 1 && direction === "down")
@@ -177,11 +168,11 @@ export const resumeSlice = createSlice({
 
         const section = draft[form][idx];
         if (direction === "up") {
-          draft[form][idx] = draft[form][idx - 1];
-          draft[form][idx - 1] = section;
+          draft[form][idx] = draft[form][idx - 1] as any;
+          draft[form][idx - 1] = section as any;
         } else {
-          draft[form][idx] = draft[form][idx + 1];
-          draft[form][idx + 1] = section;
+          draft[form][idx] = draft[form][idx + 1] as any;
+          draft[form][idx + 1] = section as any;
         }
       }
     },
@@ -190,7 +181,7 @@ export const resumeSlice = createSlice({
       action: PayloadAction<{ form: ShowForm; idx: number }>
     ) => {
       const { form, idx } = action.payload;
-      if (form !== "skills" && form !== "custom") {
+      if (form !== "custom") {
         draft[form].splice(idx, 1);
       }
     },
@@ -207,6 +198,7 @@ export const {
   changeProjects,
   changeSkills,
   changeCustom,
+  changeLanguages,
   addSectionInForm,
   moveSectionInForm,
   deleteSectionInFormByIdx,
@@ -221,5 +213,6 @@ export const selectEducations = (state: RootState) => state.resume.educations;
 export const selectProjects = (state: RootState) => state.resume.projects;
 export const selectSkills = (state: RootState) => state.resume.skills;
 export const selectCustom = (state: RootState) => state.resume.custom;
+export const selectLanguages = (state: RootState) => state.resume.languages;
 
 export default resumeSlice.reducer;

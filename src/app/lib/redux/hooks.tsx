@@ -33,12 +33,34 @@ export const useSaveStateToLocalStorageOnChange = () => {
   }, []);
 };
 
+// Migrate legacy skills shape ({featuredSkills, descriptions}) to the new
+// grouped-categories array. Runs once on hydrate; no-op for users already on
+// the new shape.
+export const migrateLegacySkills = (resume: any) => {
+  if (!resume?.skills) return;
+  if (Array.isArray(resume.skills)) return;
+  const legacy = resume.skills;
+  const featured = Array.isArray(legacy.featuredSkills)
+    ? legacy.featuredSkills
+        .map((f: { skill?: string }) => f?.skill?.trim() || "")
+        .filter(Boolean)
+    : [];
+  const descriptions = Array.isArray(legacy.descriptions)
+    ? legacy.descriptions
+        .map((d: string) => (typeof d === "string" ? d.trim() : ""))
+        .filter(Boolean)
+    : [];
+  const joined = [...featured, ...descriptions].join(", ");
+  resume.skills = joined ? [{ name: "", skills: joined }] : [{ name: "", skills: "" }];
+};
+
 export const useSetInitialStore = () => {
   const dispatch = useAppDispatch();
   useEffect(() => {
     const state = loadStateFromLocalStorage();
     if (!state) return;
     if (state.resume) {
+      migrateLegacySkills(state.resume);
       // We merge the initial state with the stored state to ensure
       // backward compatibility, since new fields might be added to
       // the initial state over time.

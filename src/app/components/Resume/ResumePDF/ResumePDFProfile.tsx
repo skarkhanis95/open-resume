@@ -1,14 +1,13 @@
 import { View } from "@react-pdf/renderer";
+import { styles, spacing } from "components/Resume/ResumePDF/styles";
+import {
+  ResumePDFLink,
+  ResumePDFText,
+} from "components/Resume/ResumePDF/common";
 import {
   ResumePDFIcon,
   type IconType,
 } from "components/Resume/ResumePDF/common/ResumePDFIcon";
-import { styles, spacing } from "components/Resume/ResumePDF/styles";
-import {
-  ResumePDFLink,
-  ResumePDFSection,
-  ResumePDFText,
-} from "components/Resume/ResumePDF/common";
 import type { ResumeProfile } from "lib/redux/types";
 
 export const ResumePDFProfile = ({
@@ -20,81 +19,115 @@ export const ResumePDFProfile = ({
   themeColor: string;
   isPDF: boolean;
 }) => {
-  const { name, email, phone, url, summary, location } = profile;
-  const iconProps = { email, phone, location, url };
+  const { name, headline, email, phone, url, location } = profile;
+
+  const getUrlIcon = (value: string): IconType => {
+    if (value.includes("github")) return "url_github";
+    if (value.includes("linkedin")) return "url_linkedin";
+    return "url";
+  };
+
+  const contactItems: {
+    key: string;
+    icon: IconType;
+    value: string;
+    src?: string;
+  }[] = [];
+  if (email)
+    contactItems.push({
+      key: "email",
+      icon: "email",
+      value: email,
+      src: `mailto:${email}`,
+    });
+  if (phone)
+    contactItems.push({
+      key: "phone",
+      icon: "phone",
+      value: phone,
+      src: `tel:${phone.replace(/[^\d+]/g, "")}`,
+    });
+  if (location)
+    contactItems.push({ key: "location", icon: "location", value: location });
+  if (url)
+    contactItems.push({
+      key: "url",
+      icon: getUrlIcon(url),
+      value: url,
+      src: url.startsWith("http") ? url : `https://${url}`,
+    });
 
   return (
-    <ResumePDFSection style={{ marginTop: spacing["4"] }}>
-      <ResumePDFText
-        bold={true}
-        themeColor={themeColor}
-        style={{ fontSize: "20pt" }}
-      >
-        {name}
-      </ResumePDFText>
-      {summary && <ResumePDFText>{summary}</ResumePDFText>}
-      <View
-        style={{
-          ...styles.flexRowBetween,
-          flexWrap: "wrap",
-          marginTop: spacing["0.5"],
-        }}
-      >
-        {Object.entries(iconProps).map(([key, value]) => {
-          if (!value) return null;
-
-          let iconType = key as IconType;
-          if (key === "url") {
-            if (value.includes("github")) {
-              iconType = "url_github";
-            } else if (value.includes("linkedin")) {
-              iconType = "url_linkedin";
-            }
-          }
-
-          const shouldUseLinkWrapper = ["email", "url", "phone"].includes(key);
-          const Wrapper = ({ children }: { children: React.ReactNode }) => {
-            if (!shouldUseLinkWrapper) return <>{children}</>;
-
-            let src = "";
-            switch (key) {
-              case "email": {
-                src = `mailto:${value}`;
-                break;
-              }
-              case "phone": {
-                src = `tel:${value.replace(/[^\d+]/g, "")}`; // Keep only + and digits
-                break;
-              }
-              default: {
-                src = value.startsWith("http") ? value : `https://${value}`;
-              }
-            }
-
-            return (
-              <ResumePDFLink src={src} isPDF={isPDF}>
-                {children}
-              </ResumePDFLink>
-            );
-          };
-
-          return (
-            <View
-              key={key}
-              style={{
-                ...styles.flexRow,
-                alignItems: "center",
-                gap: spacing["1"],
-              }}
-            >
-              <ResumePDFIcon type={iconType} isPDF={isPDF} />
-              <Wrapper>
-                <ResumePDFText>{value}</ResumePDFText>
-              </Wrapper>
-            </View>
-          );
-        })}
+    <View
+      style={{
+        ...styles.flexRow,
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: spacing["6"],
+      }}
+    >
+      <View style={{ ...styles.flexCol, flex: 1 }}>
+        <ResumePDFText
+          bold={true}
+          themeColor={themeColor}
+          style={{ fontSize: "22pt", lineHeight: 1.1 }}
+        >
+          {name}
+        </ResumePDFText>
+        {headline ? (
+          <ResumePDFText
+            bold={true}
+            style={{
+              fontSize: "11pt",
+              lineHeight: 1.4,
+              marginTop: spacing["2"],
+              color: "#333333",
+            }}
+          >
+            {headline}
+          </ResumePDFText>
+        ) : null}
       </View>
-    </ResumePDFSection>
+      {contactItems.length > 0 && (
+        <View
+          style={{
+            ...styles.flexCol,
+            width: "200pt",
+            borderLeftWidth: "1pt",
+            borderLeftStyle: "solid",
+            borderLeftColor: themeColor || "#333333",
+            paddingLeft: spacing["4"],
+          }}
+        >
+          {contactItems.map(({ key, icon, value, src }) => {
+            const text = (
+              <ResumePDFText style={{ fontSize: "9.5pt", lineHeight: 1.5 }}>
+                {value}
+              </ResumePDFText>
+            );
+            return (
+              <View
+                key={key}
+                style={{
+                  ...styles.flexRow,
+                  alignItems: "center",
+                  gap: spacing["1"],
+                  marginBottom: spacing["0.5"],
+                }}
+              >
+                <ResumePDFIcon type={icon} isPDF={isPDF} />
+                {src ? (
+                  <ResumePDFLink src={src} isPDF={isPDF}>
+                    {text}
+                  </ResumePDFLink>
+                ) : (
+                  text
+                )}
+              </View>
+            );
+          })}
+        </View>
+      )}
+    </View>
   );
 };

@@ -13,6 +13,7 @@ import { ProjectsForm } from "components/ResumeForm/ProjectsForm";
 import { SkillsForm } from "components/ResumeForm/SkillsForm";
 import { ThemeForm } from "components/ResumeForm/ThemeForm";
 import { CustomForm } from "components/ResumeForm/CustomForm";
+import { LanguagesForm } from "components/ResumeForm/LanguagesForm";
 import { FlexboxSpacer } from "components/FlexboxSpacer";
 import { cx } from "lib/cx";
 
@@ -46,6 +47,7 @@ export const ResumeForm = () => {
           const Component = formTypeToComponent[form];
           return <Component key={form} />;
         })}
+        <LanguagesForm />
         <ThemeForm />
         <br />
       </section>

@@ -1,31 +1,21 @@
 import { Page, View, Document } from "@react-pdf/renderer";
 import { styles, spacing } from "components/Resume/ResumePDF/styles";
+import {
+  ResumePDFSection,
+  ResumePDFText,
+} from "components/Resume/ResumePDF/common";
 import { ResumePDFProfile } from "components/Resume/ResumePDF/ResumePDFProfile";
 import { ResumePDFWorkExperience } from "components/Resume/ResumePDF/ResumePDFWorkExperience";
 import { ResumePDFEducation } from "components/Resume/ResumePDF/ResumePDFEducation";
 import { ResumePDFProject } from "components/Resume/ResumePDF/ResumePDFProject";
 import { ResumePDFSkills } from "components/Resume/ResumePDF/ResumePDFSkills";
 import { ResumePDFCustom } from "components/Resume/ResumePDF/ResumePDFCustom";
+import { ResumePDFLanguages } from "components/Resume/ResumePDF/ResumePDFLanguages";
 import { DEFAULT_FONT_COLOR } from "lib/redux/settingsSlice";
 import type { Settings, ShowForm } from "lib/redux/settingsSlice";
 import type { Resume } from "lib/redux/types";
 import { SuppressResumePDFErrorMessage } from "components/Resume/ResumePDF/common/SuppressResumePDFErrorMessage";
 
-/**
- * Note: ResumePDF is supposed to be rendered inside PDFViewer. However,
- * PDFViewer is rendered too slow and has noticeable delay as you enter
- * the resume form, so we render it without PDFViewer to make it render
- * instantly. There are 2 drawbacks with this approach:
- * 1. Not everything works out of box if not rendered inside PDFViewer,
- *    e.g. svg doesn't work, so it takes in a isPDF flag that maps react
- *    pdf element to the correct dom element.
- * 2. It throws a lot of errors in console log, e.g. "<VIEW /> is using incorrect
- *    casing. Use PascalCase for React components, or lowercase for HTML elements."
- *    in development, causing a lot of noises. We can possibly workaround this by
- *    mapping every react pdf element to a dom element, but for now, we simply
- *    suppress these messages in <SuppressResumePDFErrorMessage />.
- *    https://github.com/diegomura/react-pdf/issues/239#issuecomment-487255027
- */
 export const ResumePDF = ({
   resume,
   settings,
@@ -35,9 +25,9 @@ export const ResumePDF = ({
   settings: Settings;
   isPDF?: boolean;
 }) => {
-  const { profile, workExperiences, educations, projects, skills, custom } =
+  const { profile, workExperiences, educations, projects, skills, custom, languages } =
     resume;
-  const { name } = profile;
+  const { name, summary } = profile;
   const {
     fontFamily,
     fontSize,
@@ -46,8 +36,8 @@ export const ResumePDF = ({
     formToShow,
     formsOrder,
     showBulletPoints,
+    themeColor,
   } = settings;
-  const themeColor = settings.themeColor || DEFAULT_FONT_COLOR;
 
   const showFormsOrder = formsOrder.filter((form) => formToShow[form]);
 
@@ -102,32 +92,36 @@ export const ResumePDF = ({
             color: DEFAULT_FONT_COLOR,
             fontFamily,
             fontSize: fontSize + "pt",
+            paddingTop: "51pt",
+            paddingBottom: "51pt",
+            paddingLeft: "45pt",
+            paddingRight: "45pt",
           }}
         >
-          {Boolean(settings.themeColor) && (
-            <View
-              style={{
-                width: spacing["full"],
-                height: spacing[3.5],
-                backgroundColor: themeColor,
-              }}
-            />
-          )}
-          <View
-            style={{
-              ...styles.flexCol,
-              padding: `${spacing[0]} ${spacing[20]}`,
-            }}
-          >
+          <View style={{ ...styles.flexCol }}>
             <ResumePDFProfile
               profile={profile}
               themeColor={themeColor}
               isPDF={isPDF}
             />
+            {summary && (
+              <ResumePDFSection themeColor={themeColor} heading="Summary">
+                <ResumePDFText
+                  style={{
+                    lineHeight: 1.6,
+                    textAlign: "justify",
+                    marginTop: spacing["0.5"],
+                  }}
+                >
+                  {summary}
+                </ResumePDFText>
+              </ResumePDFSection>
+            )}
             {showFormsOrder.map((form) => {
               const Component = formTypeToComponent[form];
               return <Component key={form} />;
             })}
+            <ResumePDFLanguages languages={languages} themeColor={themeColor} />
           </View>
         </Page>
       </Document>

@@ -1,5 +1,6 @@
 export interface ResumeProfile {
   name: string;
+  headline: string;
   email: string;
   phone: string;
   url: string;
@@ -28,15 +29,12 @@ export interface ResumeProject {
   descriptions: string[];
 }
 
-export interface FeaturedSkill {
-  skill: string;
-  rating: number;
+export interface SkillCategory {
+  name: string;
+  skills: string;
 }
 
-export interface ResumeSkills {
-  featuredSkills: FeaturedSkill[];
-  descriptions: string[];
-}
+export type ResumeSkills = SkillCategory[];
 
 export interface ResumeCustom {
   descriptions: string[];
@@ -49,6 +47,7 @@ export interface Resume {
   projects: ResumeProject[];
   skills: ResumeSkills;
   custom: ResumeCustom;
+  languages: string;
 }
 
 export type ResumeKey = keyof Resume;

@@ -10,6 +10,7 @@ import { deepClone } from "lib/deep-clone";
 export const END_HOME_RESUME: Resume = {
   profile: {
     name: "John Doe",
+    headline: "Software Engineer | Full-Stack Developer",
     summary:
       "Software engineer obsessed with building exceptional products that people love",
     email: "hello@openresume.com",
@@ -70,23 +71,24 @@ export const END_HOME_RESUME: Resume = {
       ],
     },
   ],
-  skills: {
-    featuredSkills: [
-      { skill: "HTML", rating: 4 },
-      { skill: "CSS", rating: 4 },
-      { skill: "Python", rating: 3 },
-      { skill: "TypeScript", rating: 3 },
-      { skill: "React", rating: 3 },
-      { skill: "C++", rating: 2 },
-    ],
-    descriptions: [
-      "Tech: React Hooks, GraphQL, Node.js, SQL, Postgres, NoSql, Redis, REST API, Git",
-      "Soft: Teamwork, Creative Problem Solving, Communication, Learning Mindset, Agile",
-    ],
-  },
+  skills: [
+    {
+      name: "Languages",
+      skills: "HTML, CSS, Python, TypeScript, JavaScript, C++",
+    },
+    {
+      name: "Frameworks",
+      skills: "React, Node.js, Next.js, GraphQL",
+    },
+    {
+      name: "Tools",
+      skills: "Git, REST APIs, SQL, Postgres, Redis",
+    },
+  ],
   custom: {
     descriptions: [],
   },
+  languages: "English, Spanish",
 };
 
 export const START_HOME_RESUME: Resume = {
@@ -96,14 +98,9 @@ export const START_HOME_RESUME: Resume = {
   ),
   educations: [deepClone(initialEducation)],
   projects: [deepClone(initialProject)],
-  skills: {
-    featuredSkills: END_HOME_RESUME.skills.featuredSkills.map((item) => ({
-      skill: "",
-      rating: item.rating,
-    })),
-    descriptions: [],
-  },
+  skills: END_HOME_RESUME.skills.map(() => ({ name: "", skills: "" })),
   custom: {
     descriptions: [],
   },
+  languages: "",
 };

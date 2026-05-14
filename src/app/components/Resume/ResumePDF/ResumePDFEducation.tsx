@@ -22,35 +22,53 @@ export const ResumePDFEducation = ({
     <ResumePDFSection themeColor={themeColor} heading={heading}>
       {educations.map(
         ({ school, degree, date, gpa, descriptions = [] }, idx) => {
-          // Hide school name if it is the same as the previous school
-          const hideSchoolName =
-            idx > 0 && school === educations[idx - 1].school;
-          const showDescriptions = descriptions.join() !== "";
+          const showDescriptions = descriptions.join("").trim() !== "";
+          const degreeLine = gpa
+            ? `${degree} — ${Number(gpa) ? `${gpa} GPA` : gpa}`
+            : degree;
 
+          const [firstBullet, ...restBullets] = descriptions;
           return (
-            <View key={idx}>
-              {!hideSchoolName && (
-                <ResumePDFText bold={true}>{school}</ResumePDFText>
-              )}
-              <View
-                style={{
-                  ...styles.flexRowBetween,
-                  marginTop: hideSchoolName
-                    ? "-" + spacing["1"]
-                    : spacing["1.5"],
-                }}
-              >
-                <ResumePDFText>{`${
-                  gpa
-                    ? `${degree} - ${Number(gpa) ? gpa + " GPA" : gpa}`
-                    : degree
-                }`}</ResumePDFText>
-                <ResumePDFText>{date}</ResumePDFText>
+            <View key={idx} style={{ marginBottom: spacing["2"] }}>
+              <View wrap={false}>
+                <View
+                  style={{
+                    ...styles.flexRowBetween,
+                    alignItems: "flex-start",
+                    gap: spacing["3"],
+                  }}
+                >
+                  <View style={{ ...styles.flexCol, flex: 1 }}>
+                    {degreeLine ? (
+                      <ResumePDFText bold={true} style={{ fontSize: "11pt" }}>
+                        {degreeLine}
+                      </ResumePDFText>
+                    ) : null}
+                    {school ? (
+                      <ResumePDFText style={{ color: "#444444" }}>
+                        {school}
+                      </ResumePDFText>
+                    ) : null}
+                  </View>
+                  {date ? (
+                    <ResumePDFText style={{ color: "#444444" }}>
+                      {date}
+                    </ResumePDFText>
+                  ) : null}
+                </View>
+                {showDescriptions && firstBullet !== undefined && (
+                  <View style={{ ...styles.flexCol, marginTop: spacing["1.5"] }}>
+                    <ResumePDFBulletList
+                      items={[firstBullet]}
+                      showBulletPoints={showBulletPoints}
+                    />
+                  </View>
+                )}
               </View>
-              {showDescriptions && (
-                <View style={{ ...styles.flexCol, marginTop: spacing["1.5"] }}>
+              {showDescriptions && restBullets.length > 0 && (
+                <View style={{ ...styles.flexCol }}>
                   <ResumePDFBulletList
-                    items={descriptions}
+                    items={restBullets}
                     showBulletPoints={showBulletPoints}
                   />
                 </View>

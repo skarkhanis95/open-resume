@@ -18,32 +18,32 @@ export const ResumePDFSection = ({
   <View
     style={{
       ...styles.flexCol,
-      gap: spacing["2"],
       marginTop: spacing["5"],
       ...style,
     }}
   >
     {heading && (
-      <View style={{ ...styles.flexRow, alignItems: "center" }}>
-        {themeColor && (
-          <View
-            style={{
-              height: "3.75pt",
-              width: "30pt",
-              backgroundColor: themeColor,
-              marginRight: spacing["3.5"],
-            }}
-            debug={DEBUG_RESUME_PDF_FLAG}
-          />
-        )}
+      <View
+        style={{
+          borderBottomWidth: "1pt",
+          borderBottomStyle: "solid",
+          borderBottomColor: themeColor || "#333333",
+          paddingBottom: spacing["1"],
+          marginBottom: spacing["2"],
+        }}
+        minPresenceAhead={50}
+        wrap={false}
+      >
         <Text
           style={{
             fontWeight: "bold",
-            letterSpacing: "0.3pt", // tracking-wide -> 0.025em * 12 pt = 0.3pt
+            letterSpacing: "0.5pt",
+            fontSize: "11pt",
+            color: themeColor || DEFAULT_FONT_COLOR,
           }}
           debug={DEBUG_RESUME_PDF_FLAG}
         >
-          {heading}
+          {heading.toUpperCase()}
         </Text>
       </View>
     )}
@@ -140,36 +140,3 @@ export const ResumePDFLink = ({
   );
 };
 
-export const ResumeFeaturedSkill = ({
-  skill,
-  rating,
-  themeColor,
-  style = {},
-}: {
-  skill: string;
-  rating: number;
-  themeColor: string;
-  style?: Style;
-}) => {
-  const numCircles = 5;
-
-  return (
-    <View style={{ ...styles.flexRow, alignItems: "center", ...style }}>
-      <ResumePDFText style={{ marginRight: spacing[0.5] }}>
-        {skill}
-      </ResumePDFText>
-      {[...Array(numCircles)].map((_, idx) => (
-        <View
-          key={idx}
-          style={{
-            height: "9pt",
-            width: "9pt",
-            marginLeft: "2.25pt",
-            backgroundColor: rating >= idx ? themeColor : "#d9d9d9",
-            borderRadius: "100%",
-          }}
-        />
-      ))}
-    </View>
-  );
-};

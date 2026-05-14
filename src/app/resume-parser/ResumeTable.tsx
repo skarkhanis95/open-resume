@@ -47,15 +47,9 @@ export const ResumeTable = ({ resume }: { resume: Resume }) => {
     resume.workExperiences.length === 0
       ? [deepClone(initialWorkExperience)]
       : resume.workExperiences;
-  const skills = [...resume.skills.descriptions];
-  const featuredSkills = resume.skills.featuredSkills
-    .filter((item) => item.skill.trim())
-    .map((item) => item.skill)
-    .join(", ")
-    .trim();
-  if (featuredSkills) {
-    skills.unshift(featuredSkills);
-  }
+  const skillCategories = resume.skills.filter(
+    (cat) => cat.name.trim() || cat.skills.trim()
+  );
   return (
     <table className="mt-2 w-full border text-sm text-gray-900">
       <tbody className="divide-y text-left align-top">
@@ -120,7 +114,17 @@ export const ResumeTable = ({ resume }: { resume: Resume }) => {
           </Fragment>
         ))}
         <TableRowHeader>Skills</TableRowHeader>
-        <TableRow label="Descriptions" value={skills} />
+        {skillCategories.length === 0 ? (
+          <TableRow label="Skills" value="" />
+        ) : (
+          skillCategories.map((cat, idx) => (
+            <TableRow
+              key={idx}
+              label={cat.name || "Skills"}
+              value={cat.skills}
+            />
+          ))
+        )}
       </tbody>
     </table>
   );
